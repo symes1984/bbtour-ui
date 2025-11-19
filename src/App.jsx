@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Search, Filter, MapPin, Loader2, Film, Layers } from "lucide-react";
+import { Search, Filter, MapPin, Loader2, Film, Layers, Scale, Car } from "lucide-react";
 
 /**
  * Breaking Bad / Better Call Saul Tour UI (High-Contrast BrBa Theme)
@@ -21,6 +21,49 @@ import { Search, Filter, MapPin, Loader2, Film, Layers } from "lucide-react";
  *  - Inputs/cards use darker panels and brighter text
  *  - Map switched to dark tiles; popup styled to match
  */
+
+// Small helper to render show-specific icons in results
+function ShowIcon({ show }) {
+  const s = String(show || "").toLowerCase();
+
+  if (s.includes("breaking bad")) {
+    return (
+      <span className="flex items-center gap-[2px]" title="Breaking Bad" aria-label="Breaking Bad">
+        <span className="bb-show-tile">Br</span>
+      </span>
+    );
+  }
+  if (s.includes("better call saul")) {
+    return (
+      <span className="bb-show-pill" title="Better Call Saul" aria-label="Better Call Saul">
+        <Scale className="h-3 w-3" />
+        <span className="sr-only">Better Call Saul</span>
+      </span>
+    );
+  }
+  if (s.includes("el camino")) {
+    return (
+      <span className="bb-show-pill" title="El Camino" aria-label="El Camino">
+        <Car className="h-3 w-3" />
+        <span className="sr-only">El Camino</span>
+      </span>
+    );
+  }
+  // Fallback: initials pill (e.g., “M” for Metástasis)
+  const initials =
+    String(show || "?")
+      .split(/\s+/)
+      .map((w) => w[0])
+      .join("")
+      .slice(0, 3)
+      .toUpperCase();
+
+  return (
+    <span className="bb-show-pill" title={String(show)} aria-label={String(show)}>
+      {initials}
+    </span>
+  );
+}
 
 // Fix default Leaflet icon
 const DefaultIcon = new L.Icon({
@@ -122,6 +165,13 @@ export default function BreakingBadTourUI() {
   .bb-chip{ background:#0a3f30; border:1px solid #0f6e55; color:#eafff4; border-radius:0.375rem; }
   .bb-chip-muted{ background:#0a2c24; border:1px solid #0d4c3b; color:#d4fff0; }
   .bb-scene-text{ color:#eafff4; }
+    .bb-show-tile{ display:inline-grid; place-items:center; width:1.1rem; height:1.1rem;
+    font-weight:800; font-size:10px; line-height:1; background:#064e3b; color:#d1fae5;
+    border:1px solid #0a7a5e; border-radius:0.25rem; }
+  .bb-show-pill{ display:inline-flex; align-items:center; gap:.25rem; height:1.1rem; padding:0 .375rem;
+    font-weight:700; font-size:10px; line-height:1; background:#052a22; color:#b9f4dc;
+    border:1px solid #0a5c46; border-radius:9999px; }
+
   `;
 
   // Server/query state
@@ -363,7 +413,11 @@ export default function BreakingBadTourUI() {
                   <span className="truncate" title={loc.name}>{loc.name}</span>
                   <div className="flex items-center gap-1">
                     {Boolean(loc.series?.length) && (
-                      <span className="text-[10px] text-emerald-200/80">{loc.series.join(" · ")}</span>
+                      <div className="flex items-center gap-1">
+                        {(loc.series || []).map((s, i) => (
+                          <ShowIcon key={i} show={String(s)} />
+                        ))}
+                      </div>
                     )}
                   </div>
                 </CardTitle>
